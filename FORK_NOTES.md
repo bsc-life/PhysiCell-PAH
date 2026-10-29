@@ -9,7 +9,7 @@ layout (`core/`, `BioFVM/`, `addons/`, `sample_projects*/`, the root
 ## What this fork adds
 
 One new sample project:
-[`sample_projects_intracellular/boolean/HAP_PASMC_vessel_wall/`](sample_projects_intracellular/boolean/HAP_PASMC_vessel_wall/README.md) —
+[`sample_projects_intracellular/boolean/PAH_vessel/`](sample_projects_intracellular/boolean/PAH_vessel/README.md) —
 a PhysiBoSS agent-based model of the pulmonary arterial vessel wall in PAH
 (**HAP** = *Hipertensión Arterial Pulmonar*), built on a curated PASMC
 Boolean network (Ca2+/Calcineurin/NFAT/Kv1.5 loop + Myocd/Klf4 phenotype
@@ -17,7 +17,7 @@ toggle). See that folder's own README for the model description, build
 instructions, and provenance.
 
 The root `Makefile`'s `list-projects` target and project-loading rules
-gained one new target, `hap-pasmc-vessel-wall-sample`, following the exact
+gained one new target, `pah-vessel`, following the exact
 convention already used by the other `sample_projects_intracellular/boolean/*`
 projects (`physiboss-cell-lines-sample`, `physiboss-tutorial`, etc.) — copy
 the project's `config/`/`custom_modules/`/`main.cpp`/`Makefile` over the

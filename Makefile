@@ -78,7 +78,7 @@ list-projects:
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
 	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion"
-	@echo "                 hap-pasmc-vessel-wall-sample"
+	@echo "                 pah-vessel"
 	@echo ""
 	
 template:
@@ -253,14 +253,14 @@ physiboss-cell-lines-sample:
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
 	cp ./sample_projects_intracellular/boolean/physiboss_cell_lines/config/* ./config/
 
-hap-pasmc-vessel-wall-sample:
-	cp ./sample_projects_intracellular/boolean/HAP_PASMC_vessel_wall/custom_modules/* ./custom_modules/
+pah-vessel:
+	cp ./sample_projects_intracellular/boolean/PAH_vessel/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
-	cp ./sample_projects_intracellular/boolean/HAP_PASMC_vessel_wall/main.cpp ./main.cpp
+	cp ./sample_projects_intracellular/boolean/PAH_vessel/main.cpp ./main.cpp
 	cp Makefile Makefile-backup
-	cp ./sample_projects_intracellular/boolean/HAP_PASMC_vessel_wall/Makefile .
+	cp ./sample_projects_intracellular/boolean/PAH_vessel/Makefile .
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml
-	cp ./sample_projects_intracellular/boolean/HAP_PASMC_vessel_wall/config/*.xml ./sample_projects_intracellular/boolean/HAP_PASMC_vessel_wall/config/*.bnd ./sample_projects_intracellular/boolean/HAP_PASMC_vessel_wall/config/*.cfg ./sample_projects_intracellular/boolean/HAP_PASMC_vessel_wall/config/*.csv ./config/
+	cp ./sample_projects_intracellular/boolean/PAH_vessel/config/*.xml ./sample_projects_intracellular/boolean/PAH_vessel/config/*.bnd ./sample_projects_intracellular/boolean/PAH_vessel/config/*.cfg ./sample_projects_intracellular/boolean/PAH_vessel/config/*.csv ./config/
 
 physiboss-tutorial:
 	cp ./sample_projects_intracellular/boolean/tutorial/custom_modules/* ./custom_modules/

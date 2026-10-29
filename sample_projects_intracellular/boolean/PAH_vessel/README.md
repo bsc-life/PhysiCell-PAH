@@ -1,4 +1,4 @@
-# HAP_PASMC_vessel_wall — a PhysiBoSS vessel-wall model of pulmonary arterial hypertension
+# PAH_vessel — a PhysiBoSS vessel-wall model of pulmonary arterial hypertension
 
 **HAP** = *Hipertensión Arterial Pulmonar* (Spanish for Pulmonary Arterial
 Hypertension, PAH), the name used in this project's own source cell-type
@@ -50,7 +50,7 @@ the full methods/results narrative this model was developed against
 ```bash
 # from the repo root (after `make PhysiBoSS_Vessel_Gradient-setup` style
 # libMaBoSS fetch happens automatically on first build):
-make hap-pasmc-vessel-wall-sample
+make pah-vessel
 make -j4
 ./PhysiBoSS_Vessel_Gradient
 ```
