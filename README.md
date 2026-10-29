@@ -1,5 +1,8 @@
 # PhysiCell: an Open Source Physics-Based Cell Simulator for 3-D Multicellular Systems
 
+> **This fork adds a PhysiBoSS model of pulmonary arterial hypertension (PAH / HAP).**
+> See [`README_PAH.md`](README_PAH.md) for the model and what's new in this fork.
+
 **Versions:** 1.14.0 - 
 
 **Release dates:** 15 September 2024 - 
