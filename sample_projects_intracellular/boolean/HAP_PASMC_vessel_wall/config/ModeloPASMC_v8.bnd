@@ -1,0 +1,512 @@
+// =====================================================================
+//  ModeloPASMC_base_v2_TRPC6_feedback.bnd
+//  LITERATURE EXTENSION of ModeloPASMC_base_v2.bnd -- adds the TRPC6/NFAT
+//  transcriptional positive-feedback loop, as an ALTERNATIVE/independent
+//  candidate chronic-adaptation mechanism to the AMLO_escape variant (which
+//  rests on the contested Johnson et al. 2020 PNAS STIM1-direct-binding
+//  claim -- see docs/amlodipine_adaptation_mechanism.md section 1's
+//  controversy disclosure). This variant does NOT touch Stim1_pm/Soce at
+//  all and does NOT require AMLO as a trigger.
+//
+//  MECHANISM ADDED (well-replicated, NOT contested):
+//    - TRPC6 is reproducibly overexpressed in PASMC from IPAH patients
+//      (multiple independent groups).
+//    - Kuwahara K et al., "TRPC6 fulfills a calcineurin signaling circuit
+//      during pathologic cardiac remodeling," J Clin Invest 2006 (PMC1635163):
+//      TRPC6 current activates calcineurin -> NFAT translocates to nucleus
+//      -> NFAT binds directly in the TRPC6 promoter -> more TRPC6
+//      transcription -> more current -> more NFAT activation (a genuine
+//      self-amplifying loop, validated by promoter-reporter assays and by
+//      pharmacological loop interruption).
+//    - Yu Y et al., "Inhibition of phosphodiesterase-5 suppresses
+//      calcineurin/NFAT-mediated TRPC6 expression in pulmonary artery
+//      smooth muscle cells," PMC5519690: the same loop demonstrated
+//      specifically in PASMC, driven by ET-1 via calcineurin/NFATc4.
+//
+//  IMPLEMENTATION: two new edges, both required to close the loop (the
+//  base model has Trpc6 feeding only the generic Ca_global contractile
+//  pool, with NO connection to Calcineurina/Nfat at all):
+//    1. A new Ca_trpc6 microdomain, built EXACTLY like Ca_local (SOCE) and
+//       Ca_ltcc (L-type) -- "cada canal el suyo" per the base model's own
+//       microdomain philosophy -- feeding Calcineurina as a third,
+//       independent input.
+//    2. Trpc6 gains a second, NFAT-driven transcriptional activation
+//       branch (slow, $u_nfat_trpc6, new & UNCALIBRATED -- set equal to
+//       $k_transc as the model's existing generic "slow transcriptional"
+//       rate) alongside its original fast PLC/DAG-gated branch ($u_trpc6).
+//
+//  CRITICAL STRUCTURAL POINT: Calcineurina/Nfat is additively driven by
+//  THREE independent microdomains in this variant (Ca_ltcc, Ca_local/SOCE,
+//  Ca_trpc6). SNX29 (section 8 of the mechanism doc) only brakes the
+//  Ca_local/SOCE input via $f_snx29 -- it has NO effect on Ca_trpc6. A
+//  patient with a fully protective SNX29 genotype is therefore NOT
+//  protected from this route.
+// =====================================================================
+
+// =====================================================================
+//  ModeloPASMC_base_v2.bnd   ·   34 nodos   [revision nodo a nodo]
+//  Tras revisar si lo YA PRESENTE estaba bien descrito (no si faltaba algo):
+//    R1. CDI del ORAI1, simetrica con la del CaV1.2 (la anterior era unilateral)
+//    R2. Calcineurina deja de ser absorbente
+//    R3. La PLC se desensibiliza con estimulo sostenido
+//    R4. La PKC decae
+//    R5. Asimetria de extrusion en microdominios: declarada, no corregida
+//  Respuesta celular de la PASMC humana al amlodipino.
+//  Base: ModeloV7_B2. Tres correcciones de fidelidad celular, CERO nodos nuevos:
+//    4. Inactivacion del CaV1.2 por calcio (CDI)
+//    5. Extrusion de calcio dependiente de calcio (PMCA / NCX directo)
+//    6. Actividad residual de la MLCP (quita el artefacto booleano)
+//  Los tres corrigen el MISMO sesgo: el modelo exageraba lo que logra el farmaco.
+//  Base: ModeloV7_B1 (33 nodos). Cambios: nodo Ca_ltcc; la calcineurina pasa a
+//  leer dos microdominios con el MISMO peso; se elimina $u_cn_ltcc.
+//  Celula muscular lisa de arteria pulmonar humana (PASMC).
+//
+//  Corrige PASMC_SOCE_v7 tras auditoria. CAMBIOS RESPECTO A v7:
+//
+//   C1 (ESENCIAL) CREC_1 y CREC_2 dejan de ser ABSORBENTES.
+//      En v7 tenian rate_down = @logic ? 0.0 : $d_crec, de modo que en cuanto
+//      Nfat o Hif1a se encendian el nodo subia a 1 y se quedaba. Verificado:
+//      a t=200 y t=400, CREC_1 = 1,0000 exacto en los tres niveles de SNX29,
+//      mientras SOCE seguia valiendo 0,233 / 0,161 / 0,099. La conclusion
+//      principal del v7 (resistencia a SNX29 bajo hipoxia) era ESE artefacto.
+//      Ahora rate_down es no nulo siempre, igual que en Sr_lleno, Stim1_pm,
+//      Ca_global, Ca_local, Trpc6, Ncx_rev y Rock. CREC era el unico nodo del
+//      modelo que violaba ese patron.
+//      Estacionario = rate_up / (rate_up + rate_down).
+//
+//   C2 Se DECLARAN dos consecuencias del cambio v7 que su informe no recogia:
+//      - Bucle positivo nuevo: Ltcc -> Calcineurina -> Nfat -| Kv1_5 -| Em_depol
+//        -> Ltcc. Se conserva porque sus dos aristas estan respaldadas, pero
+//        desplaza el reposo y se reporta.
+//      - El control de especificidad del K+ deja de valer para CRECIMIENTO
+//        (no para contraccion). Se reporta como prediccion, no se oculta.
+//
+//   C3 Documentacion: las reglas de este fichero son las unicas validas. El
+//      informe del v7 citaba reglas que no coincidian con su propio codigo
+//      (CREC_1 difiere en un factor 20) y un inventario de nodos inexistente.
+//
+//  SE CONSERVA DE v7 (ideas correctas, bien motivadas):
+//   - Acoplamiento excitacion-transcripcion: Calcineurina = Ca_local OR Ltcc
+//   - Sensor de hipoxia independiente del calcio: Hif1a
+//   - Crecimiento multifactorial: CREC_1 = Nfat OR Hif1a
+//  SE CONSERVA DE v6/v6b (calibraciones previas, NO son logros de v7):
+//   - $block_amlo = 200, calibrado en v6 contra ancla externa de KCl
+//   - $d_rock_gap = 1, freno RhoGAP a ROCK
+//   - Dag fusionado en Plc
+//   - Recarga de SERCA acoplada al calcio citosolico ($f_recarga_baja = 0,3)
+//
+//  PROCEDENCIA DE LAS ARISTAS (consulta a SIGNOR via NeKo, 15-10-2026)
+//   RESPALDADAS:
+//     CACNA1C -> calcium(2+)            PMID 30849329
+//     calcium(2+) -> PPP3CA             PMID 21880741, 22944199
+//     PPP3CA -> NFATC3                  PMID 21880741
+//       -> la cadena canal L -> calcio -> calcineurina -> NFAT que el v7
+//          anadio ESTA en SIGNOR. Era el v6 el que se apartaba, al separar dos
+//          pozas de calcio y alimentar la calcineurina solo desde la del SOCE.
+//     EGLN1 -| HIF1A                    PMID 32755251
+//       -> fundamenta el eje hipoxia -> HIF1A (la hipoxia inactiva la prolil
+//          hidroxilasa y HIF1A se estabiliza). EGLN1 no se anade como nodo:
+//          queda agrupado en Hif1a = HIPOXIA, declarado aqui.
+//   MANUALES (no estan en SIGNOR con estas semillas):
+//     HIF1A -> proliferacion            manual
+//     NFATC3 -| KCNA5                   manual (Bonnet 2007, [verificar])
+//     SNX29 -| translocacion de STIM1   manual (Karnes 2026)
+//     NCX1 en modo inverso              manual (SLC8A1 ausente de SIGNOR)
+//     PKC -| TRPC6 (Ser448)             manual (SIGNOR solo tiene la indirecta)
+// =====================================================================
+
+
+// ---------------------------------------------------------------------
+// ENTRADAS  (constantes; se fijan en el .cfg)
+// ---------------------------------------------------------------------
+
+node AMLO    { logic = AMLO;    rate_up = 0; rate_down = 0; }   // amlodipino
+node ET1     { logic = ET1;     rate_up = 0; rate_down = 0; }   // endotelina-1
+node HIPOXIA { logic = HIPOXIA; rate_up = 0; rate_down = 0; }
+node K_ALTO  { logic = K_ALTO;  rate_up = 0; rate_down = 0; }   // KCl 40 mM
+node CPA     { logic = CPA;     rate_up = 0; rate_down = 0; }   // ciclopiazónico
+
+// v8 -- CAMBIO ESTRUCTURAL: CACNA1C deja de ser una entrada congelada.
+// DISTINCION QUE SE RESPETA: bajar CACNA1C NO es cerrar el canal. Cerrarlo lo
+// hacen el voltaje y el amlodipino (la proteina esta, la compuerta se echa,
+// reversible en milisegundos) y eso vive en el nodo Ltcc, que sigue siendo
+// Ltcc = CACNA1C AND Myocd... AND Em_depol. Bajar CACNA1C es que hay MENOS
+// canal en la membrana porque la celula dejo de transcribir el gen: tarda dias
+// y solo revierte volviendo a expresarlo. Por eso $d_cav es LENTO.
+// EXPRESION RESIDUAL, NO ABOLICION: la celula sintetica conserva CaV1.2
+// funcional (otra variante del C-terminal, otra regulacion; lo usa para migrar,
+// no para contraer). Lo soportado es el cambio de REPARTO, no la desaparicion
+// del canal. Mismo recurso que $u_mlcp_resid en el cambio 6 del modelo base, y
+// por el mismo motivo: evitar el artefacto booleano del cero exacto.
+node CACNA1C {
+  logic = Myocd;
+  rate_up   = @logic ? $u_cav : $u_cav_resid;
+  rate_down = $d_cav;
+}
+node STIM1   { logic = STIM1;   rate_up = 0; rate_down = 0; }
+node ORAI1   { logic = ORAI1;   rate_up = 0; rate_down = 0; }
+node ATP2A2  { logic = ATP2A2;  rate_up = 0; rate_down = 0; }
+// v8.1 -- 4th personalized real-gene dosage input, same role as STIM1/ORAI1/
+// ATP2A2 above: a frozen per-agent gate on the dynamic Trpc6 channel node
+// below (see that node's logic), NOT itself dynamic. Personalized from the
+// real snRNA-seq PAH Beta_minmax fit (smc_heterogeneity_summary.csv) --
+// unlike ORAI1, TRPC6's gene span (425 kb) argues AGAINST snRNA-seq dropout
+// (it is LONGER than STIM1's 238 kb), so the raw fit is used with no
+// dropout correction.
+node TRPC6   { logic = TRPC6;   rate_up = 0; rate_down = 0; }
+
+// SNX29 no es nodo: su nivel modula la tasa de Stim1_pm vía $f_snx29.
+
+
+// ---------------------------------------------------------------------
+// RAMA ELÉCTRICA  ->  CANAL L
+// ---------------------------------------------------------------------
+
+node Kv1_5 {
+  // v8: KCNA5 NO es un nodo propio -- esta agrupado dentro de Kv1_5, y no se
+  // crea uno nuevo solo para esto. La dependencia de Myocd entra por la TASA DE
+  // SUBIDA, tambien con residual: la celula sintetica baja Kv1.5 pero no lo
+  // abole. La logica NO se toca, para no confundir expresion con compuerta.
+  logic = (NOT Nfat) AND (NOT HIPOXIA);
+  rate_up   = @logic ? (Myocd ? $u_kv : $u_kv_resid) : 0.0;
+  rate_down = HIPOXIA ? $k_fast : (Nfat ? $k_transc : 0.0);
+}
+
+node Em_depol {    // BLOQUE 1: el canal BK entra por la TASA, no por la logica.
+                   // Razon: BK aumenta la conductancia al K+ y acelera la
+                   // repolarizacion, pero NO puede anular un impulso
+                   // despolarizante fuerte. Si entrara como "AND NOT Bkca",
+                   // el KCl 40 mM dejaria de contraer, que es falso.
+                   // Efecto secundario deseado: Em_depol pasa a ser GRADUADO
+                   // en vez de valer 1,000 siempre, que era un defecto conocido
+                   // desde el v4.
+  logic = K_ALTO OR ET1 OR (NOT Kv1_5);
+  rate_up   = @logic ? $k_fast : 0.0;
+  rate_down = @logic ? (Bkca ? $d_em_bk : 0.0) : $k_fast;
+}
+
+node Bkca {        // KCNMA1 (+ subunidad beta1 KCNMB1). Canal de potasio de gran
+                   // conductancia, activado por calcio Y por voltaje: exige las
+                   // dos cosas, por eso logic = Ca_global AND Em_depol.
+                   // RESPALDO SIGNOR: calcium(2+) -> KCNMA1, PMID 31152168.
+                   // MANUAL: la consecuencia funcional (hiperpolariza y cierra
+                   // el canal L) es electrofisiologia, no figura en SIGNOR.
+                   //
+                   // POR QUE ENTRA (criterio (a)): aporta la unica
+                   // retroalimentacion NEGATIVA del circuito electrico. El v7
+                   // creo el bucle POSITIVO Ltcc -> Calcineurina -> Nfat -|
+                   // Kv1_5 -| Em_depol -> Ltcc y no anadio nada que lo frenara.
+  logic = Ca_global AND Em_depol;
+  rate_up   = @logic ? $u_bk : 0.0;
+  rate_down = @logic ? $d_bk : $k_fast;
+}
+
+node Ltcc {        // CaV1.2 abierto.
+                   // Bloqueo dependiente de estado por amlodipino (calibrado a 200).
+  // CAMBIO 4: INACTIVACION DEPENDIENTE DE CALCIO (CDI).
+  // El CaV1.2 se inactiva por voltaje Y por calcio, esto ultimo mediado por
+  // calmodulina unida a su extremo C-terminal. Es de las propiedades mejor
+  // caracterizadas del canal. El calcio que la dispara es el que entra por el
+  // PROPIO canal, de ahi que se lea Ca_ltcc (su microdominio) y no Ca_global.
+  // Sin CDI el canal queda mas abierto de lo real y el amlodipino PARECE hacer
+  // mas de lo que hace.
+  logic = CACNA1C AND Em_depol;
+  rate_up   = @logic ? $u_ltcc : 0.0;
+  rate_down = @logic ? (AMLO ? $block_amlo : ($d_ltcc + (Ca_ltcc ? $d_ltcc_cdi : 0.0))) : $k_fast;
+}
+
+
+// ---------------------------------------------------------------------
+// RAMA DEL RETÍCULO  ->  SOCE (v6b: acoplada al calcio citosólico)
+// ---------------------------------------------------------------------
+
+node Plc {         // PLCbeta (PLCB1). Genera IP3 y DAG simultaneamente (1:1).
+                   // R3: la senal de ET-1 se DESENSIBILIZA (fosforilacion del
+                   // receptor por GRK, internalizacion): rate_down no nulo.
+  logic = ET1;
+  rate_up   = @logic ? $k_fast : 0.0;
+  rate_down = @logic ? $d_plc_desens : $k_fast;
+}
+
+node Serca {
+  // NOTE: a CaMKII/phospholamban-motivated AMLO-gating of rate_up was tried
+  // and reverted here (clinical-metrics sweep session) -- Serca.istate=1 and
+  // logic=ATP2A2 AND (NOT CPA) is permanently true for personalized agents,
+  // so rate_down=0 always and Serca is an ABSORBING on-state from t=0: a
+  // rate_up edit can never matter once a cell starts (and stays) ON. Fixing
+  // this for real would need rate_down made AMLO-responsive too -- set aside
+  // in favor of a simpler well-mixed toy demonstration instead.
+  logic = ATP2A2 AND (NOT CPA);
+  rate_up   = @logic ? $k_fast : 0.0;
+  rate_down = @logic ? 0.0 : $k_fast;
+}
+
+node Sr_lleno {    // Contenido del RS, graduado.
+                   // REGLA v6b CONSERVADA INTACTA: recarga dependiente de Ca_global
+  logic = Serca AND (NOT Plc);
+  rate_up   = Serca ? ($u_sr * (Ca_global ? 1.0 : $f_recarga_baja) / (HIPOXIA ? $f_hipox : 1.0)) : 0.0;
+  rate_down = Plc ? $d_sr_ip3 : $d_sr_fuga;
+}
+
+node Stim1_pm {    // Recambio continuo de puncta; SNX29 frena la subida
+  logic = STIM1 AND (NOT Sr_lleno);
+  rate_up   = @logic ? ($u_stim * (CPA ? $drive_cpa : 1.0) / $f_snx29) : 0.0;
+  rate_down = @logic ? $d_stim : $d_stim_off;
+}
+
+node Soce {
+  // R1: INACTIVACION DEPENDIENTE DE CALCIO DEL CANAL CRAC. ORAI1 tambien se
+  // inactiva por calcio, rapida y lentamente. Al haber anadido la CDI solo al
+  // CaV1.2, el modelo quedaba ASIMETRICO: penalizaba una puerta y no la otra.
+  logic = Stim1_pm AND ORAI1;
+  rate_up   = @logic ? $k_fast : 0.0;
+  rate_down = @logic ? (Ca_local ? $d_soce_cdi : 0.0) : $k_fast;
+}
+
+
+// ---------------------------------------------------------------------
+// ENTRADA OPERADA POR RECEPTOR (ROCE)
+// ---------------------------------------------------------------------
+
+node Trpc6 {       // TRPC6: Abierto por DAG (Plc) y cerrado por PKC en Ser448.
+                   // NUEVO (TRPC6_feedback variant): segundo brazo, mas lento,
+                   // de induccion TRANSCRIPCIONAL via NFAT (Kuwahara 2006;
+                   // PMC5519690) -- independiente de AMLO, independiente de
+                   // SNX29 (que solo frena STIM1_pm/Soce, no este brazo).
+  // v8 -- TERCER BRAZO, basal, del estado sintetico (Klf4).
+  // AVISO DE AUDITABILIDAD, declarado: este nodo tiene ya TRES brazos con tasas
+  // distintas (DAG rapido / NFAT transcripcional / Klf4 basal) y una sola
+  // rate_down. Es el nodo mas dificil de auditar del modelo. Prioridad de las
+  // tasas: DAG > Klf4 > NFAT, y se resuelve en ese orden en el condicional.
+  // v8.1 -- GATED por TRPC6 (dosis genica personalizada per-agente, igual
+  // que STIM1 sobre Stim1_pm / ORAI1 sobre Soce / ATP2A2 sobre Serca): sin
+  // suficiente expresion de TRPC6, el canal no puede abrirse aunque la
+  // senalizacion rio arriba (Plc/Nfat/Klf4) lo pida.
+  logic = TRPC6 AND ((Plc AND (NOT Pkc)) OR Nfat OR Klf4);
+  rate_up   = @logic ? ( (Plc AND (NOT Pkc)) ? $u_trpc6
+                       : (Klf4 ? $u_klf4_trpc6 : $u_nfat_trpc6) ) : 0.0;
+  rate_down = @logic ? $d_trpc6 : $k_fast;
+}
+
+node Pkc {         // PRKCA: Detector de coincidencia (DAG + Ca2+)
+  // R4: NO ABSORBENTE. La actividad de PKC decae por fosfatasas y metabolismo
+  // del DAG, tambien mientras el estimulo persiste.
+  logic = Plc AND Ca_global;
+  rate_up   = @logic ? $u_pkc : 0.0;
+  rate_down = $d_pkc;
+}
+
+
+// ---------------------------------------------------------------------
+// NCX1 EN MODO INVERSO
+// ---------------------------------------------------------------------
+
+node Ncx_rev {     // SLC8A1 en reversa: mete calcio bajo despolarización y TRPC6
+  logic = Em_depol AND (NOT Sr_lleno) AND Trpc6;
+  rate_up   = @logic ? $u_ncx : 0.0;
+  rate_down = @logic ? $d_ncx : $k_fast;
+}
+
+
+// ---------------------------------------------------------------------
+// LAS DOS POZAS DE CALCIO
+// ---------------------------------------------------------------------
+
+node Ca_global {   // Entrada global de calcio a la maquinaria contráctil
+  // CAMBIO 5: EXTRUSION DEPENDIENTE DE CALCIO.
+  // La PMCA se activa por calcio-calmodulina y el NCX trabaja contra el
+  // gradiente de calcio: los dos sacan calcio MAS DEPRISA cuanto mas hay.
+  // Antes $d_ca era constante, lo que es sencillamente incorrecto.
+  // La tasa de salida escala ahora con el numero de vias abiertas, que es el
+  // proxy de cuanto calcio esta entrando.
+  // CONSECUENCIA, declarada: la celula defiende su calcio, de modo que cerrar
+  // UNA puerta cambia menos el total. El efecto relativo del amlodipino BAJA.
+  logic = Ltcc OR Soce OR Trpc6 OR Ncx_rev;
+  rate_up   = $u_ca * ((Ltcc ? 1.0 : 0.0) + (Soce ? 1.0 : 0.0) + (Trpc6 ? 1.0 : 0.0) + (Ncx_rev ? 1.0 : 0.0));
+  rate_down = $d_ca * (1.0 + $f_extr * ((Ltcc ? 1.0 : 0.0) + (Soce ? 1.0 : 0.0) + (Trpc6 ? 1.0 : 0.0) + (Ncx_rev ? 1.0 : 0.0)));
+}
+
+node Ca_local {    // R5, DECLARADO: los microdominios conservan $d_ca CONSTANTE,
+                   // mientras Ca_global usa extrusion dependiente de calcio. No es
+                   // descuido: en un microdominio el vaciado lo domina la DIFUSION
+                   // hacia el citosol, no las bombas.
+                   // Microdominio subplasmalemal de SOCE
+  logic = Soce;
+  rate_up   = @logic ? $u_ca : 0.0;
+  rate_down = $d_ca;
+}
+
+node Ca_trpc6 {    // NUEVO (TRPC6_feedback variant): microdominio de TRPC6,
+                   // construido IGUAL que Ca_local/Ca_ltcc ("cada canal el
+                   // suyo"). Cierra el brazo "TRPC6 -> calcineurina" del
+                   // bucle de Kuwahara 2006 / PMC5519690 -- AUSENTE en el
+                   // modelo base, donde Trpc6 solo alimentaba Ca_global.
+  logic = Trpc6;
+  rate_up   = @logic ? $u_ca : 0.0;
+  rate_down = $d_ca;
+}
+
+
+// ---------------------------------------------------------------------
+// SENSIBILIZACIÓN AL CALCIO  (RhoA / ROCK -> MLCP)
+// ---------------------------------------------------------------------
+
+node Rock {        // Freno RhoGAP conservado de v6 ($d_rock_gap = 1.0)
+  logic = ET1;
+  rate_up   = @logic ? $u_rock : 0.0;
+  rate_down = @logic ? $d_rock_gap : $d_rock;
+}
+
+node Mlcp {        // Fosfatasa de la miosina
+  // CAMBIO 6: ACTIVIDAD RESIDUAL.
+  // En v5-v7 la MLCP caia a CERO EXACTO con endotelina, porque su rate_up valia
+  // 0 en cuanto ROCK o PKC se encendian. Eso es un artefacto booleano: ROCK
+  // inhibe la fosfatasa PARCIALMENTE, no la abole. Con un rate_up residual la
+  // MLCP queda graduada tambien bajo inhibicion.
+  logic = (NOT Rock) AND (NOT Pkc);
+  rate_up   = @logic ? $u_mlcp : $u_mlcp_resid;
+  rate_down = @logic ? 0.0 : $d_mlcp;
+}
+
+node Mlck {        // MYLK, activada por calcio-calmodulina
+  logic = Ca_global;
+  rate_up   = @logic ? $u_mlck : 0.0;
+  rate_down = @logic ? 0.0 : $d_mlck;
+}
+
+
+// ---------------------------------------------------------------------
+// CAMBIO 1 (v7) · EFECTOR TRANSCRIPCIONAL ACOPLADO A CANAL L Y SOCE
+// ---------------------------------------------------------------------
+
+node Ca_ltcc {     // BLOQUE 2: microdominio subsarcolemal del canal L.
+                   // Antes, la calcineurina leia la POZA del SOCE (Ca_local) pero
+                   // leia el CANAL L directamente, saltandose las pozas. Eso no era
+                   // ni la vision de SIGNOR (una sola poza) ni la de microdominios
+                   // (cada canal el suyo): era un hibrido.
+                   // Ahora el canal L tiene su microdominio, tratado EXACTAMENTE
+                   // igual que el del SOCE: mismas tasas $u_ca y $d_ca.
+                   // Efecto sobre el bucle positivo: gana un paso con cinetica
+                   // propia, de modo que su ganancia baja.
+  logic = Ltcc;
+  rate_up   = @logic ? $u_ca : 0.0;
+  rate_down = $d_ca;
+}
+
+node Calcineurina { // PPP3CA. Acoplamiento excitacion-transcripcion.
+                   // CADENA RESPALDADA EN SIGNOR: CACNA1C -> calcio -> PPP3CA.
+                   // CONSECUENCIA DECLARADA (C2): cierra un bucle POSITIVO nuevo
+                   //   Ltcc -> Calcineurina -> Nfat -| Kv1_5 -| Em_depol -> Ltcc
+                   // que se autoamplifica desde el ruido y desplaza el reposo.
+                   // Se conserva porque sus aristas estan respaldadas, pero el
+                   // estado de reposo resultante se reporta y queda sin calibrar.
+                   // El microdominio de SOCE (Ca_local) y el flujo masivo por
+                   // el canal L dependiente de voltaje (Ltcc) activan la fosfatasa.
+                   // La tasa suma las dos contribuciones ponderadas.
+  // BLOQUE 2: lee DOS MICRODOMINIOS, no una poza y un canal. Los dos pesan
+  // IGUAL ($u_cn). Se elimina $u_cn_ltcc, que era una asimetria arbitraria de la
+  // que dependia el resultado principal del modelo. Ahora la diferencia entre
+  // ambas vias emerge de su DINAMICA, no de un peso elegido a mano.
+  logic = Ca_local OR Ca_ltcc OR Ca_trpc6;  // NUEVO: + Ca_trpc6
+  // R2: NO ABSORBENTE. Fosfatasa dependiente de calcio-calmodulina: su
+  // actividad decae cuando el calcio baja, no se queda fija.
+  rate_up   = (Ca_local ? $u_cn : 0.0) + (Ca_ltcc ? $u_cn : 0.0) + (Ca_trpc6 ? $u_cn : 0.0);  // NUEVO: + Ca_trpc6
+  rate_down = $d_cn;
+}
+
+node Nfat {
+  logic = Calcineurina OR Nfat;
+  rate_up   = @logic ? $u_nfat : 0.0;
+  rate_down = @logic ? $leak_nfat : $d_nfat;
+}
+
+
+// ---------------------------------------------------------------------
+// CAMBIO 2 (v7) · SENSOR DE HIPOXIA INDEPENDIENTE DE CALCIO (HIF-1α)
+// ---------------------------------------------------------------------
+
+node Hif1a {       // HIF1A. En normoxia se hidroxila por PHDs y se degrada vía VHL.
+                   // Bajo hipoxia se estabiliza de forma independiente al calcio
+                   // y activa programas de supervivencia y proliferación.
+  logic = HIPOXIA;
+  rate_up   = @logic ? $u_hif : 0.0;
+  rate_down = @logic ? 0.0 : $d_hif;
+}
+
+
+// ---------------------------------------------------------------------
+// CAMBIO 3 (v7) · SALIDAS DE CRECIMIENTO Y CONTRACCIÓN
+// ---------------------------------------------------------------------
+
+node CONTR_1 {     // Fosforilación de miosina: balance MLCK / MLCP
+  // v8: exige Myocd. Una celula sintetica ha perdido el aparato contractil.
+  logic = Myocd AND (Mlck OR (NOT Mlcp));
+  rate_up   = Mlck ? $u_con : $u_con_basal;
+  rate_down = Mlcp ? $d_con : $d_con_sens;
+}
+
+node CONTR_2 {     // Fase sostenida dependiente de SOCE
+  logic = CONTR_1 AND Soce;
+  rate_up   = @logic ? $u_con : 0.0;
+  rate_down = @logic ? 0.0 : (CONTR_1 ? $d_con : $k_fast);
+}
+
+node CREC_1 {      // Crecimiento celular primario / remodelado:
+                   // Vía redundante multifactorial: estimulado por la vía de calcio/NFAT
+                   // O por la alarma crónica hipóxica de HIF-1α.
+                   // $u_crec_hif domina el remodelado hipóxico a largo plazo,
+                   // mientras $u_crec_nfat mantiene la modulación residual de SNX29.
+  logic = Nfat OR Hif1a;
+  rate_up   = (Hif1a ? $u_crec_hif : 0.0) + (Nfat ? $u_crec_nfat : 0.0);
+  rate_down = $d_crec;      // C1: NO NULO SIEMPRE. El nodo deja de ser absorbente.
+}
+
+node CREC_2 {      // Fase sostenida / hipertrófica dependiente de calcio
+  logic = CREC_1 AND Ca_local AND Ltcc;
+  rate_up   = @logic ? $u_crec : 0.0;
+  rate_down = CREC_1 ? $d_crec : $k_fast;   // C1: no absorbente. Si CREC_1 cae,
+                                            // el nivel 2 se desmonta rapido.
+}
+
+
+// =====================================================================
+// v8 -- CAMBIO 1: TOGGLE DE ESTADO  KLF4 -| MYOCD   (doble negativo)
+// =====================================================================
+// El cambio contractil -> sintetico no es un gradiente: es un interruptor de
+// doble negativo. MYOCD (con SRF) mantiene el programa contractil y reprime a
+// KLF4; KLF4 reprime el programa contractil. NFAT empuja hacia el lado de KLF4.
+// NO se implementa un latch con parametro de irreversibilidad: se implementa el
+// MOTIVO, y la histeresis emerge de el.
+// $leak_klf4 NO es nulo bajo logica verdadera: Klf4 NO es absorbente.
+
+node Klf4 {                  // driver del estado sintetico
+  logic = Nfat OR (NOT Myocd);
+  rate_up   = @logic ? $u_klf4 : 0.0;
+  rate_down = @logic ? $leak_klf4 : $d_klf4;
+}
+
+node Myocd {                 // miocardina: mantiene el programa contractil
+  logic = NOT Klf4;
+  rate_up   = @logic ? $u_myocd : 0.0;
+  rate_down = @logic ? 0.0 : $d_myocd;
+}
+
+// =====================================================================
+// v8 -- CAMBIO 2: RESISTENCIA A APOPTOSIS
+// =====================================================================
+// ARISTA MANUAL: NFAT -> resistencia a apoptosis. En PASMC de pacientes con HAP
+// la activacion sostenida de NFATc2 se asocia a regulacion al alza de Bcl-2 y
+// resistencia a apoptosis (Bonnet S et al., PNAS 2007;104:11418-23). El estado
+// sintetico comparte la propiedad.
+//
+// LIMITACION DECLARADA: en esta fase NADIE LEE este nodo dentro de la red, asi
+// que NO SE PUEDE VALIDAR AQUI. Se anade a ciegas, con tres parametros sin
+// ancla, porque hace falta que exista antes de montar la capa de tejido, donde
+// se mapeara sobre la tasa de apoptosis del agente (comportamiento que
+// PhysiCell ya tiene). Su calibracion es tarea de esa fase, no de esta.
+
+node Resist_apop {
+  logic = Nfat OR Klf4;
+  rate_up   = @logic ? $u_resist : 0.0;
+  rate_down = @logic ? $d_resist_on : $d_resist;
+}

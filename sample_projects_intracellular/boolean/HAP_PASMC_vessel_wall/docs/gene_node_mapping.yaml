@@ -1,0 +1,113 @@
+# gene_node_mapping.yaml
+#
+# CURRENT MODEL: models/ModeloPASMC_base_v2.{bnd,cfg} -- the team's final,
+# SIGNOR/NeKo-curated 34-node PASMC model (supersedes the earlier 11-node
+# prototype pasmc_calcium_nfat_kv15.bnd, kept in models/ only for
+# reference/history; do not personalize against it going forward).
+#
+# Maps the FREE, gene-named input nodes of ModeloPASMC_base_v2.bnd to the
+# marker gene whose snRNA-seq expression should set that node's
+# initial-state probability for a given (cell_type, condition) pair.
+#
+# ModeloPASMC_base_v2.bnd declares NINE free input nodes (rate_up =
+# rate_down = 0 -- state set purely by .istate, never by logic): four are
+# gene/channel-identity nodes that a cell's baseline transcriptome can
+# plausibly set --  CACNA1C, STIM1, ORAI1, ATP2A2 (below) -- and five are
+# EXPERIMENTAL/PHARMACOLOGICAL SCENARIO SWITCHES, not something read off a
+# resting-state transcriptome: AMLO (amlodipine), ET1 (endothelin-1
+# stimulation), HIPOXIA, K_ALTO (40 mM KCl depolarization), CPA
+# (cyclopiazonic acid, a SERCA inhibitor). Those five are set by the
+# EXPERIMENTAL DESIGN of a given simulation (e.g. "dose-response to
+# amlodipine" sweeps AMLO; "chronic hypoxia PAH scenario" sets
+# HIPOXIA.istate = 1), not by personalize_intracellular_model.py -- see
+# `scenario_inputs` below for that mapping instead of `nodes`.
+#
+# Every other node in the model (Kv1_5, Em_depol, Bkca, Ltcc, Plc, Serca,
+# Sr_lleno, Stim1_pm, Soce, Trpc6, Pkc, Ncx_rev, Ca_global, Ca_local,
+# Ca_ltcc, Rock, Mlcp, Mlck, Ca_ltcc, Calcineurina, Nfat, Hif1a, CONTR_1/2,
+# CREC_1/2) is DERIVED by the network's own logic and is intentionally not
+# personalized independently -- doing so would double-count biology the
+# network already encodes and could break its internal consistency (several
+# of the model's own code comments flag exactly this risk, e.g. the
+# Ltcc->Calcineurina->Nfat-|Kv1_5-|Em_depol->Ltcc positive feedback loop).
+#
+# `genes`: one or more gene symbols (must match adata.var_names exactly,
+#          case-sensitive) averaged together (simple mean of their
+#          per-group pseudobulk expression) to produce that node's signal.
+# `scale`: "minmax" (default) rescales the per-node pseudobulk expression
+#          to [0, 1] using the min/max observed ACROSS ALL (cell_type,
+#          condition) groups present in the input file, then clips to
+#          [floor, ceiling] so no node is ever forced to a hard 0 or 1
+#          probability (both remain stochastically reachable in MaBoSS).
+
+nodes:
+  CACNA1C:
+    genes: [CACNA1C]
+    description: >
+      CaV1.2 L-type Ca2+ channel pore subunit. Gates the voltage-dependent
+      Ltcc node (logic = CACNA1C AND Em_depol) -- this node is the channel's
+      AVAILABILITY/expression, not its open probability (that's Ltcc).
+    scale: minmax
+    floor: 0.02
+    ceiling: 0.98
+
+  STIM1:
+    genes: [STIM1]
+    description: >
+      ER Ca2+-store depletion sensor; availability feeds Stim1_pm (puncta
+      formation), upstream of store-operated Ca2+ entry through Soce.
+    scale: minmax
+    floor: 0.02
+    ceiling: 0.98
+
+  ORAI1:
+    genes: [ORAI1]
+    description: >
+      Store-operated Ca2+ channel (CRAC); gates Soce together with
+      Stim1_pm (logic = Stim1_pm AND ORAI1).
+    scale: minmax
+    floor: 0.02
+    ceiling: 0.98
+
+  ATP2A2:
+    genes: [ATP2A2]
+    description: >
+      SERCA2 Ca2+-ATPase; availability feeds the Serca node (logic =
+      ATP2A2 AND NOT CPA), which determines SR refilling (Sr_lleno).
+    scale: minmax
+    floor: 0.02
+    ceiling: 0.98
+
+# Experimental/pharmacological scenario switches -- set by simulation
+# design, NOT by personalize_intracellular_model.py. Listed here only so
+# the full set of ModeloPASMC_base_v2's free inputs is documented in one
+# place.
+scenario_inputs:
+  AMLO: "Amlodipine (CCB) exposure -- calibrated block of Ltcc ($block_amlo)."
+  ET1: "Endothelin-1 stimulation -- drives Plc/Rock (vasoconstrictor tone)."
+  HIPOXIA: "Chronic hypoxia -- drives Hif1a and accelerates Kv1_5 closure."
+  K_ALTO: "40 mM KCl depolarization -- the classic contraction-assay stimulus."
+  CPA: "Cyclopiazonic acid -- pharmacological SERCA inhibitor (SR-depletion probe)."
+
+# Reference only (NOT personalized -- listed so the mapping between gene
+# names and the model's internal node names is auditable):
+downstream_reference:
+  Ltcc: CACNA1C          # channel OPEN state (node, not the gene-availability input above)
+  Kv1_5: KCNA5            # voltage-gated K+ channel; logic = (!Nfat) AND (!HIPOXIA)
+  Bkca: KCNMA1            # Ca2+/voltage-activated K+ channel; logic = Ca_global AND Em_depol
+  Trpc6: TRPC6            # receptor-operated channel; now fully derived (logic = Plc AND !Pkc)
+  Plc: PLCB1              # PLC-beta; logic = ET1
+  Serca: ATP2A2           # pump OPEN/active state (node, not the gene-availability input above)
+  Ncx_rev: SLC8A1         # Na+/Ca2+ exchanger in reverse mode
+  Calcineurina: PPP3CA    # Ca2+/calmodulin-activated phosphatase
+  Nfat: NFATC3            # nuclear factor of activated T-cells (PASMC isoform used here)
+  Hif1a: HIF1A            # hypoxia-inducible factor 1-alpha
+  Mlck: MYLK              # myosin light-chain kinase
+  Rock: RHOA              # RhoA/ROCK pathway (lumped as RhoA; ROCK1/ROCK2 downstream)
+
+# ---------------------------------------------------------------------
+# LEGACY (superseded): the 11-node prototype pasmc_calcium_nfat_kv15.bnd
+# used PIEZO1 (not present in ModeloPASMC_base_v2) and a simplified
+# TRPC6-as-free-input assumption that the real model's node-by-node review
+# replaced (Trpc6 is now fully derived from Plc/Pkc). Kept for history only.
+# ---------------------------------------------------------------------
