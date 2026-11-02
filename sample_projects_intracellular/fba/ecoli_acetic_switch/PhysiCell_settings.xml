@@ -73,54 +73,15 @@
 -->
 
 <PhysiCell_settings version="devel-version">
-	<domain>
-		<x_min>-100</x_min>
-		<x_max>100</x_max>
-		<y_min>-100</y_min>
-		<y_max>100</y_max>
-		<z_min>-10</z_min>
-		<z_max>10</z_max>
-		<dx>10</dx>
-		<dy>10</dy>
-		<dz>10</dz>
-		<use_2D>true</use_2D>
-	</domain>
-	
-	<overall>
-		<max_time units="min">1080</max_time> 
-		<time_units>min</time_units>
-		<space_units>micron</space_units>
-	</overall>
-	
-	<parallel>
-		<omp_num_threads>4</omp_num_threads>
-	</parallel> 
-	
-	<save>
-		<folder>output</folder>
-		<full_data>
-			<interval units="min">5</interval>
-			<enable>true</enable>
-		</full_data>
-		
-		<SVG>
-			<interval units="min">5</interval>
-			<enable>true</enable>
-		</SVG>
-		
-		<legacy_data>
-			<enable>false</enable>
-		</legacy_data>
-	</save>
-	
-	<user_parameters>
-		<random_seed type="int" units="dimensionless">50</random_seed> 
-		
-		<fluid_fraction type="double" units="dimensionless">0.75</fluid_fraction>
-		<cytoplasmic_biomass_change_rate type="double" units="1/min">0.15</cytoplasmic_biomass_change_rate>
-        <fluid_change_rate type="double" units="1/min">0.15</fluid_change_rate>
-		<birth_rate type="double" units="1/min">0.00833333</birth_rate>
-        <cell_volume type="double" units="micron^3">20.0</cell_volume>
+    <domain>        <x_min>-100</x_min>        <x_max>100</x_max>        <y_min>-100</y_min>        <y_max>100</y_max>        <z_min>-10</z_min>        <z_max>10</z_max>        <dx>10</dx>        <dy>10</dy>        <dz>10</dz>        <use_2D>true</use_2D>    </domain>	
+    <overall>        <max_time units="min">1080</max_time>         <time_units>min</time_units>        <space_units>micron</space_units>    </overall>	
+    <parallel>        <omp_num_threads>4</omp_num_threads>    </parallel> 	
+    <save>        <folder>output</folder>        <full_data>            <interval units="min">5</interval>            <enable>true</enable>        </full_data>		
+        <SVG>            <interval units="min">5</interval>            <enable>true</enable>        </SVG>		
+        <legacy_data>            <enable>false</enable>        </legacy_data>    </save>	
+    <user_parameters>        <random_seed type="int" units="dimensionless">50</random_seed> 		
+        <fluid_fraction type="double" units="dimensionless">0.75</fluid_fraction>        <cytoplasmic_biomass_change_rate type="double" units="1/min">0.15</cytoplasmic_biomass_change_rate>        <fluid_change_rate type="double" units="1/min">0.15</fluid_change_rate>
+        <birth_rate type="double" units="1/min">0.00833333</birth_rate>        <cell_volume type="double" units="micron^3">20.0</cell_volume>
 		
         <!-- PhysiFBA parameters --> 
         <sbml_model type="string" units="">./config/Ecoli_core.xml</sbml_model>
@@ -137,7 +98,6 @@
 		
 		
 		
-	</user_parameters>
-	
+    </user_parameters>	
 	
 </PhysiCell_settings>

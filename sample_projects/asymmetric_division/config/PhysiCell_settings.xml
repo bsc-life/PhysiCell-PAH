@@ -375,8 +375,7 @@
                 <sample conserved="false" units="dimensionless" description="">0.0</sample>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="progenitor_2" ID="2">
             <phenotype>
                 <cycle code="5" name="live">
@@ -516,8 +515,7 @@
                 <sample conserved="false" units="dimensionless" description="">0.0</sample>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
     </cell_definitions>
 
     <initial_conditions>

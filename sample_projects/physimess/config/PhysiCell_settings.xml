@@ -237,8 +237,7 @@
                 <cell_velocity_max conserved="false" units="" description="max cell velocity">1.0</cell_velocity_max>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="ecm" ID="1">
             <phenotype>
                 <cycle code="5" name="live">
@@ -379,8 +378,7 @@
                 <angle_normdist_sd conserved="false" units="radians" description="standard deviation of fibre orientation angle">0.0</angle_normdist_sd>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="attractant" ID="2">
             <phenotype>
                 <cycle code="5" name="live">
@@ -515,8 +513,7 @@
                 <sample conserved="false" units="" description="">1.0</sample>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
     </cell_definitions>
 
     <initial_conditions>

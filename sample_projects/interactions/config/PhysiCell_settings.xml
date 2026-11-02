@@ -355,8 +355,7 @@
                 <inflammation_sensitivity conserved="false" units="" description="">0.0</inflammation_sensitivity>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="blood vessel" ID="1">
             <phenotype>
                 <cycle code="5" name="live">
@@ -554,8 +553,7 @@
                 <inflammation_sensitivity conserved="false" units="" description="">0.0</inflammation_sensitivity>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="stem" ID="2">
             <phenotype>
                 <cycle code="5" name="live">
@@ -753,8 +751,7 @@
                 <inflammation_sensitivity conserved="false" units="" description="">0.0</inflammation_sensitivity>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="differentiated" ID="3">
             <phenotype>
                 <cycle code="5" name="live">
@@ -952,8 +949,7 @@
                 <inflammation_sensitivity conserved="false" units="" description="">0.0</inflammation_sensitivity>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="macrophage" ID="4">
             <phenotype>
                 <cycle code="5" name="live">
@@ -1151,8 +1147,7 @@
                 <inflammation_sensitivity conserved="false" units="" description="">0</inflammation_sensitivity>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="CD8+ T cell" ID="5">
             <phenotype>
                 <cycle code="5" name="live">
@@ -1350,8 +1345,7 @@
                 <inflammation_sensitivity conserved="false" units="" description="">0.0</inflammation_sensitivity>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="neutrophil" ID="6">
             <phenotype>
                 <cycle code="5" name="live">
@@ -1549,8 +1543,7 @@
                 <inflammation_sensitivity conserved="false" units="" description="">0.0</inflammation_sensitivity>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
     </cell_definitions>
 
     <initial_conditions>

@@ -254,8 +254,7 @@
                 <virus_digestion_rate conserved="false" units="1/min" description="">0.01</virus_digestion_rate>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="macrophage" ID="1">
             <phenotype>
                 <cycle code="6" name="Flow cytometry model (separated)">
@@ -401,8 +400,7 @@
                 <virus_digestion_rate conserved="false" units="1/min" description="">0.01</virus_digestion_rate>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
     </cell_definitions>
 
     <initial_conditions>

@@ -215,8 +215,7 @@
                 <transfer_rate conserved="false" units="1/min" description="">0.1</transfer_rate>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
     </cell_definitions>
 
     <initial_conditions>

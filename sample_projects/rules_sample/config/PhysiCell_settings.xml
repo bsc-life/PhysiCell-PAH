@@ -328,8 +328,7 @@
                 <sample conserved="false" units="dimensionless" description="">1.0</sample>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="M0 macrophage" ID="1">
             <phenotype>
                 <cycle code="5" name="live">
@@ -507,8 +506,7 @@
                 <sample conserved="false" units="dimensionless" description="">0.0</sample>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="M1 macrophage" ID="2">
             <phenotype>
                 <cycle code="5" name="live">
@@ -686,8 +684,7 @@
                 <sample conserved="false" units="dimensionless" description="">0.0</sample>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="M2 macrophage" ID="3">
             <phenotype>
                 <cycle code="5" name="live">
@@ -865,8 +862,7 @@
                 <sample conserved="false" units="dimensionless" description="">0.0</sample>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="effector T cell" ID="4">
             <phenotype>
                 <cycle code="5" name="live">
@@ -1044,8 +1040,7 @@
                 <sample conserved="false" units="dimensionless" description="">0.0</sample>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
         <cell_definition name="exhausted T cell" ID="5">
             <phenotype>
                 <cycle code="5" name="live">
@@ -1223,8 +1218,7 @@
                 <sample conserved="false" units="dimensionless" description="">0.0</sample>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
     </cell_definitions>
 
     <initial_conditions>

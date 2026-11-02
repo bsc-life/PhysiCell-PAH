@@ -217,8 +217,7 @@
                 <oncoprotein conserved="false" units="dimensionless" description="">1.0</oncoprotein>
             </custom_data>
             <initial_parameter_distributions enabled="false">
-          </initial_parameter_distributions>
-        </cell_definition>
+        </initial_parameter_distributions>        </cell_definition>
     </cell_definitions>
 
     <initial_conditions>
