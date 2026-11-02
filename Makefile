@@ -78,7 +78,7 @@ list-projects:
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
 	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion"
-	@echo "                 pah-vessel"
+	@echo "                 pah-vessel-sample"
 	@echo ""
 	
 template:
@@ -304,10 +304,19 @@ template_BM:
 	cp ./sample_projects_intracellular/boolean/template_BM/main.cpp ./main.cpp 
 	cp Makefile Makefile-backup
 	cp ./sample_projects_intracellular/boolean/template_BM/Makefile .
-	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml
 	cp -r ./sample_projects_intracellular/boolean/template_BM/config/* ./config/
 	mkdir ./scripts/
 	cp ./sample_projects_intracellular/boolean/template_BM/scripts/* ./scripts/
+
+pah-vessel-sample:
+	cp ./sample_projects_intracellular/boolean/PAH_vessel/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/PAH_vessel/main.cpp ./main.cpp
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/PAH_vessel/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml
+	cp -r ./sample_projects_intracellular/boolean/PAH_vessel/config/* ./config/
 
 # early examples for convergence testing 
 
