@@ -17,7 +17,7 @@
         <dt_phenotype units="min">10</dt_phenotype>
     </overall>
 
-    <parallel><omp_num_threads>4</omp_num_threads></parallel>
+    <parallel><omp_num_threads>112</omp_num_threads></parallel>
 
     <save>
         <folder>output</folder>
