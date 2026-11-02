@@ -14,7 +14,7 @@
         <space_units>micron</space_units>
         <dt_diffusion units="min">0.05</dt_diffusion>
         <dt_mechanics units="min">1</dt_mechanics>
-        <dt_phenotype units="min">1</dt_phenotype>
+        <dt_phenotype units="min">10</dt_phenotype>
     </overall>
 
     <parallel><omp_num_threads>4</omp_num_threads></parallel>
