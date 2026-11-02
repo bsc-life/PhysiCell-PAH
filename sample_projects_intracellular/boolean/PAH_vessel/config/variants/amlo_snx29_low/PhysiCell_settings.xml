@@ -128,7 +128,7 @@
                     </model>
                 </death>
                 <volume>
-                    <total units="micron^3">1767.15</total>  <!-- 15 um diameter, matches build_vessel_cross_section.py --smc-diameter -->
+                    <total units="micron^3">1767.15</total> 
                     <fluid_fraction units="dimensionless">0.75</fluid_fraction>
                     <nuclear units="micron^3">540</nuclear>
                     <fluid_change_rate units="1/min">0.0</fluid_change_rate>

@@ -1,11 +1,11 @@
 <PhysiCell_settings version="devel-version">
 
     <domain>
-        <x_min>-420.0</x_min><x_max>420.0</x_max>
-        <y_min>-420.0</y_min><y_max>420.0</y_max>
-        <z_min>-10</z_min><z_max>10</z_max>
+        <x_min>-300.0</x_min><x_max>300.0</x_max>
+        <y_min>-300.0</y_min><y_max>300.0</y_max>
+        <z_min>-50</z_min><z_max>50</z_max>
         <dx>20</dx><dy>20</dy><dz>20</dz>
-        <use_2D>true</use_2D>
+        <use_2D>false</use_2D>
     </domain>
 
     <overall>
@@ -156,7 +156,7 @@
                     <speed units="micron/min">0.0</speed>
                     <persistence_time units="min">5</persistence_time>
                     <migration_bias units="dimensionless">0.0</migration_bias>
-                    <options><enabled>false</enabled><use_2D>true</use_2D>
+                    <options><enabled>false</enabled><use_2D>false</use_2D>
                         <chemotaxis><enabled>false</enabled><substrate>ET1</substrate><direction>1</direction></chemotaxis>
                         <advanced_chemotaxis><enabled>false</enabled><normalize_each_gradient>false</normalize_each_gradient>
                             <chemotactic_sensitivities><chemotactic_sensitivity substrate="O2">0.0</chemotactic_sensitivity></chemotactic_sensitivities>
@@ -330,7 +330,7 @@
                     <speed units="micron/min">0.0</speed>
                     <persistence_time units="min">5</persistence_time>
                     <migration_bias units="dimensionless">0.0</migration_bias>
-                    <options><enabled>false</enabled><use_2D>true</use_2D>
+                    <options><enabled>false</enabled><use_2D>false</use_2D>
                         <chemotaxis><enabled>false</enabled><substrate>O2</substrate><direction>1</direction></chemotaxis>
                         <advanced_chemotaxis><enabled>false</enabled><normalize_each_gradient>false</normalize_each_gradient>
                             <chemotactic_sensitivities><chemotactic_sensitivity substrate="O2">0.0</chemotactic_sensitivity></chemotactic_sensitivities>
@@ -439,7 +439,7 @@
                     <speed units="micron/min">0.0</speed>
                     <persistence_time units="min">5</persistence_time>
                     <migration_bias units="dimensionless">0.0</migration_bias>
-                    <options><enabled>false</enabled><use_2D>true</use_2D>
+                    <options><enabled>false</enabled><use_2D>false</use_2D>
                         <chemotaxis><enabled>false</enabled><substrate>O2</substrate><direction>1</direction></chemotaxis>
                         <advanced_chemotaxis><enabled>false</enabled><normalize_each_gradient>false</normalize_each_gradient>
                             <chemotactic_sensitivities><chemotactic_sensitivity substrate="O2">0.0</chemotactic_sensitivity></chemotactic_sensitivities>
@@ -548,7 +548,7 @@
                     <speed units="micron/min">0.0</speed>
                     <persistence_time units="min">5</persistence_time>
                     <migration_bias units="dimensionless">0.8</migration_bias>
-                    <options><enabled>true</enabled><use_2D>true</use_2D>
+                    <options><enabled>true</enabled><use_2D>false</use_2D>
                         <chemotaxis><enabled>true</enabled><substrate>ET1</substrate><direction>1</direction></chemotaxis>
                         <advanced_chemotaxis><enabled>false</enabled><normalize_each_gradient>false</normalize_each_gradient>
                             <chemotactic_sensitivities><chemotactic_sensitivity substrate="O2">0.0</chemotactic_sensitivity></chemotactic_sensitivities>
